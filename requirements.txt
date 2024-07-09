@@ -1,0 +1,5 @@
+Pillow
+opencv-python
+pdf2image
+numpy
+openai
