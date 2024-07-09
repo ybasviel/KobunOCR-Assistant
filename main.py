@@ -24,8 +24,8 @@ def convert_pdf_to_img(pdf_path:Path) -> None:
     if not os.path.exists(pdf_path.stem):
         os.mkdir(pdf_path.stem)
 
-    for index, page in enumerate(pages):
-        page.save(Path(pdf_path.stem)/f"{index:03}.png")
+    for index in tqdm.tqdm(range(len(pages))):
+        pages[index].save(Path(pdf_path.stem)/f"{index:03}.png")
 
 def cv2_to_base64(img:np.ndarray) -> str:
     _, im_arr = cv2.imencode('.jpg', img)  # im_arr: image in Numpy one-dim array format.
@@ -106,8 +106,7 @@ def main():
 
         max_page = len(img_path_list)
 
-        #for page_num in tqdm.tqdm(range(max_page)):
-        for page_num in tqdm.tqdm(range(1)):
+        for page_num in tqdm.tqdm(range(max_page)):
             img_path = img_path_list[page_num]
                      
             # gpt4oに投げる
@@ -121,7 +120,7 @@ def main():
                 "text": res
             })
 
-        with open(Path(pdf_path.stem)/"ocr1.json", mode="w", encoding="utf8") as f:
+        with open(Path(pdf_path.stem)/"ocr.json", mode="w", encoding="utf8") as f:
             json.dump(all_text, f, ensure_ascii=False)
 
 
