@@ -9,6 +9,7 @@ import numpy as np
 import argparse
 from openai import OpenAI
 import json
+import tqdm
 
 
 client = OpenAI(
@@ -93,14 +94,22 @@ def main():
     pdf_path = args.pdf_path
 
     if not args.ocr_only:
+        print("Extract PDF to PNG image...")
         convert_pdf_to_img(pdf_path)
 
     if not args.pdf_only:
+        print("Start OCR...")
+
         img_path_list = glob.glob(str( Path(pdf_path.stem)/"*.png" ))
 
         all_text = []
 
-        for page_num, img_path in enumerate(img_path_list):
+        max_page = len(img_path_list)
+
+        #for page_num in tqdm.tqdm(range(max_page)):
+        for page_num in tqdm.tqdm(range(1)):
+            img_path = img_path_list[page_num]
+                     
             # gpt4oに投げる
             res = ocr_by_gpt4o(Path(img_path))
 
@@ -112,10 +121,8 @@ def main():
                 "text": res
             })
 
-            print(all_text)
-
-        with open(Path(pdf_path.stem)/"ocr.json", mode="w") as f:
-            json.dump(all_text, f)
+        with open(Path(pdf_path.stem)/"ocr1.json", mode="w", encoding="utf8") as f:
+            json.dump(all_text, f, ensure_ascii=False)
 
 
 if __name__ == "__main__":
