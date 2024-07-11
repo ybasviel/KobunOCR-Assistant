@@ -89,6 +89,7 @@ def main():
     parser.add_argument("pdf_path", type=Path, help="Path to the PDF file")
     parser.add_argument("-E", "--extract-pdf-only", dest="pdf_only", action='store_true', help="Extract PDF to PNG image")
     parser.add_argument("-O", "--ocr-only", dest="ocr_only", action='store_true', help="OCR PNG image only (You need extracted image files)")
+    parser.add_argument("-o", "--output-type", dest="output_type", help="Select Output Type", choices=["json", "txt"], default="json")
     args = parser.parse_args()
 
     pdf_path = args.pdf_path
@@ -102,7 +103,7 @@ def main():
 
         img_path_list = glob.glob(str( Path(pdf_path.stem)/"*.png" ))
 
-        all_text = []
+        all_pages = []
 
         max_page = len(img_path_list)
 
@@ -115,13 +116,23 @@ def main():
             if res is None:
                 res = ""
 
-            all_text.append({
+            all_pages.append({
                 "page": page_num,
                 "text": res
             })
 
-        with open(Path(pdf_path.stem)/"ocr.json", mode="w", encoding="utf8") as f:
-            json.dump(all_text, f, ensure_ascii=False)
+        if args.output_type == "json":
+            with open(Path(pdf_path.stem)/"ocr.json", mode="w", encoding="utf8") as f:
+                json.dump(all_pages, f, ensure_ascii=False, indent=4, separators=(',', ': '))
+        elif args.output_type == "txt":
+            full_text = ""
+            for page_info in all_pages:
+                full_text += f"({page_info["page"]}ページ)\n\n"
+                full_text += page_info["text"]
+                full_text += "\n\n\n"
+
+            with open(Path(pdf_path.stem)/"ocr.json", mode="w", encoding="utf8") as f:
+                f.write(full_text)
 
 
 if __name__ == "__main__":

@@ -165,3 +165,4 @@ cython_debug/
 *.pdf
 *.png
 ocr.json
+*.txt
